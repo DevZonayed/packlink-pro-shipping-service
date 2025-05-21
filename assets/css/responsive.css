@@ -1,0 +1,113 @@
+/* Responsive Styles */
+
+/* Mobile Styles (up to 640px) */
+@media (max-width: 640px) {
+  .header {
+    flex-direction: column;
+    padding: var(--spacing-sm);
+  }
+  
+  .logo {
+    margin-bottom: var(--spacing-sm);
+  }
+  
+  nav ul {
+    width: 100%;
+    justify-content: space-between;
+  }
+  
+  nav li {
+    margin-left: 0;
+  }
+  
+  .progress-tracker {
+    display: none;
+  }
+  
+  main {
+    padding: var(--spacing-md);
+  }
+  
+  .form-section {
+    padding: var(--spacing-md);
+  }
+  
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .map-container {
+    height: 250px;
+  }
+  
+  .map-overlay {
+    flex-direction: column;
+    gap: var(--spacing-sm);
+  }
+  
+  .dimensions-inputs {
+    flex-direction: column;
+  }
+  
+  .review-details {
+    grid-template-columns: 1fr;
+  }
+  
+  .form-navigation {
+    flex-direction: column;
+    gap: var(--spacing-sm);
+  }
+  
+  .btn-prev, .btn-next, .btn-submit {
+    width: 100%;
+  }
+}
+
+/* Tablet Styles (640px - 1024px) */
+@media (min-width: 641px) and (max-width: 1024px) {
+  .header {
+    padding: var(--spacing-md);
+  }
+  
+  main {
+    padding: var(--spacing-lg);
+  }
+  
+  .map-container {
+    height: 250px;
+  }
+  
+  .review-details {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* Desktop Styles (1025px and up) */
+@media (min-width: 1025px) {
+  .map-container {
+    height: 300px;
+  }
+  
+  .review-details {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* Hover effects - only on devices that support hover */
+@media (hover: hover) {
+  nav a:hover {
+    background-color: var(--color-primary-light);
+  }
+  
+  input:hover, select:hover {
+    border-color: var(--color-gray-400);
+  }
+  
+  .btn-add:hover {
+    transform: translateY(-2px);
+  }
+  
+  .btn-next:hover, .btn-submit:hover, .btn-prev:hover {
+    transform: translateY(-2px);
+  }
+}

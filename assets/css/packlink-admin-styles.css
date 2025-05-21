@@ -1,0 +1,97 @@
+/* Packlink Admin Styles */
+
+.packlink-order-details h4 {
+    margin: 1.33em 0 0.5em;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 3px;
+    font-size: 14px;
+    color: #23282d;
+}
+
+.packlink-actions {
+    margin: 15px 0;
+    display: flex;
+    gap: 8px;
+}
+
+.packlink-tracking-history {
+    margin: 10px 0;
+    padding-left: 20px;
+    list-style-type: disc;
+}
+
+.packlink-tracking-history li {
+    margin-bottom: 5px;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.packlink-tracking-info {
+    margin-top: 10px;
+    padding: 10px;
+    background-color: #f8f8f8;
+    border: 1px solid #e5e5e5;
+    border-radius: 3px;
+}
+
+.packlink-tracking-info h4 {
+    margin-top: 0;
+}
+
+.packlink-shipment-result {
+    margin-top: 10px;
+}
+
+/* Settings page styles */
+.packlink-settings-section {
+    background: #fff;
+    border: 1px solid #ccd0d4;
+    border-radius: 4px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 1px 1px rgba(0,0,0,0.04);
+}
+
+.packlink-settings-section h2 {
+    margin-top: 0;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.packlink-test-connection {
+    margin-top: 20px;
+    padding: 15px;
+    background-color: #f8f8f8;
+    border: 1px solid #e5e5e5;
+    border-radius: 3px;
+}
+
+.packlink-test-connection h2 {
+    margin-top: 0;
+}
+
+#packlink-test-connection-result {
+    margin-top: 10px;
+}
+
+.packlink-settings-table th {
+    width: 200px;
+    padding: 15px 10px 15px 0;
+}
+
+.packlink-settings-table td {
+    padding: 15px 10px;
+}
+
+.packlink-settings-table input[type="text"],
+.packlink-settings-table input[type="password"],
+.packlink-settings-table select {
+    width: 350px;
+    max-width: 100%;
+}
+
+.packlink-settings-table .description {
+    margin-top: 5px;
+    color: #666;
+    font-style: italic;
+}
