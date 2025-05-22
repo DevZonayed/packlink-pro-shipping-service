@@ -72,12 +72,22 @@ class Packlink_Admin_Order_Columns {
         
         // Create a tracking link for each reference
         foreach ($references as $reference) {
-            $tracking_page_url = admin_url('admin.php?page=packlink-tracking&reference=' . urlencode($reference));
-            echo '<a href="' . esc_url($tracking_page_url) . '" class="button-packlink-tracking" target="_blank">';
+            echo '<button type="button" onclick="copyToClipboard(\'' . urlencode($reference) . '\'); return false;" class="button">';
             echo '<span class="dashicons dashicons-location-alt"></span> ';
             echo esc_html($reference);
-            echo '</a><br>';
+            echo '</button><br>';
         }
+        
+        // Add JavaScript for clipboard functionality
+        echo '<script>
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(decodeURIComponent(text)).then(function() {
+                // Optional: Show a success message
+            }).catch(function(err) {
+                console.error("Could not copy text: ", err);
+            });
+        }
+        </script>';
     }
     
     /**
