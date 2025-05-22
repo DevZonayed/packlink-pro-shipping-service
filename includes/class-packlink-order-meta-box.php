@@ -447,6 +447,7 @@ class Packlink_Order_Meta_Box
      */
     public static function ajax_get_tracking()
     {
+        error_log('Arrived get_tracking_info');
         // Verify nonce
         if (!check_ajax_referer('packlink_order_actions', 'nonce', false)) {
             wp_send_json_error([

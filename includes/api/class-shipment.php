@@ -126,14 +126,14 @@ class Packlink_Shipment
             return $result;
         }
 
-        if (isset($result['id'])) {
+        if (isset($result['reference'])) {
             // Save Packlink shipment ID to order
-            update_post_meta($order_id, '_packlink_shipment_id', $result['id']);
+            update_post_meta($order_id, '_packlink_shipment_id', $result['reference']);
 
             // Add order note
             $order->add_order_note(sprintf(
                 __('Packlink shipment created successfully. Reference: %s', 'packlink-custom-shipping'),
-                $result['id']
+                $result['reference']
             ));
         }
 
