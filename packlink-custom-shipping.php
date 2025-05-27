@@ -3,7 +3,7 @@
 /**
  * Plugin Name: Packlink Custom Shipping Extension
  * Description: Custom integration with Packlink PRO shipping API
- * Version: 1.1.0
+ * Version: 1.1.1
  * Author: Jonayed Ahamed
  * Requires at least: 5.0
  * Requires PHP: 7.2
@@ -91,10 +91,10 @@ function packlink_custom_init()
 function packlink_custom_woocommerce_notice()
 {
 ?>
-<div class="error">
-    <p><?php _e('Packlink Custom Shipping Extension requires WooCommerce to be installed and activated.', 'packlink-custom-shipping'); ?>
-    </p>
-</div>
+    <div class="error">
+        <p><?php _e('Packlink Custom Shipping Extension requires WooCommerce to be installed and activated.', 'packlink-custom-shipping'); ?>
+        </p>
+    </div>
 <?php
 }
 
