@@ -362,103 +362,102 @@ jQuery(document).ready(function ($) {
 
     // Populate destination dropdowns for a route
     function populateDestinationDropdowns(destinations, routeIndex) {
-        const originSelect = $(`#origin_country_${routeIndex}`);
-        const destinationSelect = $(`#destination_country_${routeIndex}`);
+        const originSearch = $(`#origin_country_search_${routeIndex}`);
+        const destinationSearch = $(`#destination_country_search_${routeIndex}`);
+        const originHidden = $(`#origin_country_${routeIndex}`);
+        const destinationHidden = $(`#destination_country_${routeIndex}`);
+        const originOptions = $(`#origin_country_options_${routeIndex}`);
+        const destinationOptions = $(`#destination_country_options_${routeIndex}`);
 
-        // Clear existing options except the placeholder
-        originSelect.find('option:not(:first)').remove();
-        destinationSelect.find('option:not(:first)').remove();
+        // Store destinations data
+        originSearch.data('destinations', destinations);
+        destinationSearch.data('destinations', destinations);
 
-        // Sort destinations by name
-        destinations.sort((a, b) => {
+        // Setup search functionality for origin
+        setupCountrySearch(originSearch, originHidden, originOptions, destinations, routeIndex, 'origin');
+
+        // Setup search functionality for destination
+        setupCountrySearch(destinationSearch, destinationHidden, destinationOptions, destinations, routeIndex, 'destination');
+
+        // Set default country values if available
+        if (packlink_custom.default_origin_country) {
+            const defaultOrigin = destinations.find(d => d.isoCode === packlink_custom.default_origin_country);
+            if (defaultOrigin) {
+                selectCountry(defaultOrigin, originSearch, originHidden, routeIndex, 'origin');
+            }
+        }
+
+        if (packlink_custom.default_destination_country) {
+            const defaultDest = destinations.find(d => d.isoCode === packlink_custom.default_destination_country);
+            if (defaultDest) {
+                selectCountry(defaultDest, destinationSearch, destinationHidden, routeIndex, 'destination');
+            }
+        }
+    }
+
+    // Setup country search functionality
+    function setupCountrySearch(searchInput, hiddenInput, optionsContainer, destinations, routeIndex, type) {
+        // Search input handler
+        searchInput.on('input', function() {
+            const query = $(this).val().toLowerCase();
+            const filtered = destinations.filter(d => 
+                d.name.toLowerCase().includes(query) || 
+                d.isoCode.toLowerCase().includes(query)
+            );
+
+            renderCountryOptions(filtered, optionsContainer, searchInput, hiddenInput, routeIndex, type);
+            optionsContainer.addClass('active');
+        });
+
+        // Show options on focus
+        searchInput.on('focus', function() {
+            const query = $(this).val().toLowerCase();
+            const filtered = destinations.filter(d => 
+                d.name.toLowerCase().includes(query) || 
+                d.isoCode.toLowerCase().includes(query)
+            );
+            renderCountryOptions(filtered, optionsContainer, searchInput, hiddenInput, routeIndex, type);
+            optionsContainer.addClass('active');
+        });
+
+        // Handle click outside
+        $(document).on('click', function(e) {
+            if (!$(e.target).closest('.country-search-wrapper').length) {
+                optionsContainer.removeClass('active');
+            }
+        });
+    }
+
+    // Render country options
+    function renderCountryOptions(countries, container, searchInput, hiddenInput, routeIndex, type) {
+        container.empty();
+        
+        countries.sort((a, b) => {
             if (a.name < b.name) return -1;
             if (a.name > b.name) return 1;
             return 0;
         });
 
-        // Add destinations to dropdowns
-        destinations.forEach(function (destination) {
-            if (destination.id && destination.name) {
-                const optionText = destination.name + ' (' + destination.isoCode + ')';
-
-                // Add to origin dropdown
-                originSelect.append(
-                    $('<option></option>')
-                        .attr('value', destination.id)
-                        .attr('data-iso', destination.isoCode)
-                        .text(optionText)
-                );
-
-                // Add to destination dropdown
-                destinationSelect.append(
-                    $('<option></option>')
-                        .attr('value', destination.id)
-                        .attr('data-iso', destination.isoCode)
-                        .text(optionText)
-                );
-            }
+        countries.forEach(country => {
+            const option = $('<div>')
+                .addClass('country-option')
+                .text(`${country.name} (${country.isoCode})`)
+                .on('click', function() {
+                    selectCountry(country, searchInput, hiddenInput, routeIndex, type);
+                    container.removeClass('active');
+                });
+            container.append(option);
         });
+    }
 
-        // Set default country values if available
-        if (packlink_custom.default_origin_country) {
-            // Try to find by ISO code first
-            let originOption = originSelect.find(`option[data-iso="${packlink_custom.default_origin_country}"]`);
+    // Select a country
+    function selectCountry(country, searchInput, hiddenInput, routeIndex, type) {
+        searchInput.val(`${country.name} (${country.isoCode})`);
+        hiddenInput.val(country.id).attr('data-iso', country.isoCode);
+        hiddenInput.trigger('change');
 
-            if (originOption.length) {
-                originOption.prop('selected', true);
-            } else {
-                // Try by ID
-                originSelect.val(packlink_custom.default_origin_country);
-            }
-        }
-
-        if (packlink_custom.default_destination_country) {
-            // Try to find by ISO code first
-            let destOption = destinationSelect.find(`option[data-iso="${packlink_custom.default_destination_country}"]`);
-
-            if (destOption.length) {
-                destOption.prop('selected', true);
-            } else {
-                // Try by ID
-                destinationSelect.val(packlink_custom.default_destination_country);
-            }
-        }
-
-        // Set data-iso attribute and add change event
-        originSelect.on("change", function () {
-            const country = $(this).val();
-            const isoCode = $(this).find("option:selected").data("iso");
-
-            if (country && isoCode) {
-                $(this).attr("data-iso", isoCode);
-
-                // Update route information
-                updateRouteInfo(routeIndex);
-            }
-        });
-
-        destinationSelect.on("change", function () {
-            const country = $(this).val();
-            const isoCode = $(this).find("option:selected").data("iso");
-
-            if (country && isoCode) {
-                $(this).attr("data-iso", isoCode);
-
-                // Update route information
-                updateRouteInfo(routeIndex);
-            }
-        });
-
-        // Set initial data-iso attribute
-        if (originSelect.val()) {
-            const isoCode = originSelect.find("option:selected").data("iso");
-            originSelect.attr("data-iso", isoCode);
-        }
-
-        if (destinationSelect.val()) {
-            const isoCode = destinationSelect.find("option:selected").data("iso");
-            destinationSelect.attr("data-iso", isoCode);
-        }
+        // Update route information
+        updateRouteInfo(routeIndex);
     }
 
     // Initialize postal code autocomplete for a route
@@ -960,7 +959,6 @@ jQuery(document).ready(function ($) {
     }
 
     // Load shipping options for a specific route
-    // Load shipping options for a route
     function loadShippingOptions(routeIndex) {
         // Show loading message
         $(`#shipping-options-route-${routeIndex}`).html(`
@@ -1081,110 +1079,134 @@ jQuery(document).ready(function ($) {
     // Display shipping options for a specific route
     function displayShippingOptions(routeIndex, options) {
         if (options.length === 0) {
-            showError(packlink_custom.no_shipping_options, routeIndex);
+            showError(packlink_custom.no_shipping_options || 'No shipping options available', routeIndex);
             return;
         }
 
-        let html = '<ul class="shipping-options">';
+        // Get the correct container
+        const container = document.querySelector(`#shipping-options-list-${routeIndex}`);
+        if (!container) return;
 
-        options.forEach(function (option) {
+        // Clear existing options
+        container.innerHTML = '';
+
+        // Create shipping options list
+        const optionsList = document.createElement('ul');
+        optionsList.className = 'shipping-options';
+
+        options.forEach((option, index) => {
+            const li = document.createElement('li');
+            li.className = index >= 6 ? 'hidden-option' : '';
+            
             // Format delivery time and first delivery date
             let deliveryInfo = "";
             if (option.deliveryTime) {
-                deliveryInfo += packlink_custom.delivery_time + ": " + option.deliveryTime;
+                deliveryInfo += `<p>Delivery time: ${option.deliveryTime}</p>`;
             }
             if (option.firstDeliveryDate) {
                 const formattedDate = formatDate(option.firstDeliveryDate);
-                if (deliveryInfo) deliveryInfo += " | ";
-                deliveryInfo += packlink_custom.estimated_delivery + ": " + formattedDate;
+                deliveryInfo += `<p>Estimated delivery: ${formattedDate}</p>`;
             }
 
-            // Format price
-            const formattedPrice = formatPrice(option.price, option.currency);
-
-            // Add drop-off indicator
-            const dropOffIndicator = option.isDropOff
-                ? '<span class="drop-off-indicator">' + packlink_custom.drop_off_point_required + '</span>'
-                : '';
-
-            // Check if this option is selected
-            const isSelected = selectedShippingOptions[routeIndex] &&
-                selectedShippingOptions[routeIndex].id === option.id;
-
-            // Add selected class if this option is selected
-            const selectedClass = isSelected ? 'selected' : '';
-
-            // Update drop-off indicator if a drop-off point is selected
-            let dropOffIndicatorHtml = dropOffIndicator;
-            if (isSelected && option.isDropOff && selectedDropOffPoints[routeIndex]) {
-                dropOffIndicatorHtml = '<span class="drop-off-indicator drop-off-selected">' +
-                    (packlink_custom.drop_off_point_selected || 'Drop-off point selected') +
-                    '</span>';
-            }
-
-            html += `
-            <li data-is-dropoff="${option.isDropOff ? "yes" : "no"}" data-method-id="${option.id}" class="${selectedClass}">
+            // Create option content
+            li.innerHTML = `
                 <div class="option-details">
                     <img src="${option.logoUrl || packlink_custom.default_carrier_logo}" alt="${option.carrierName}">
                     <div class="option-info">
-                        <h4>${option.carrierName} - ${option.serviceName}</h4>
-                        <p>${deliveryInfo}</p>
-                        ${dropOffIndicatorHtml}
+                        <h4>${option.carrierName}</h4>
+                        <p>${option.serviceName}</p>
+                        ${deliveryInfo}
+                        ${option.isDropOff ? '<span class="drop-off-indicator">Drop-off required</span>' : ''}
                     </div>
-                    <div class="option-price">${formattedPrice}</div>
                 </div>
+                <div class="option-price">${formatPrice(option.price, option.currency)}</div>
                 <button type="button" class="select-shipping" 
-                        data-id="${option.id}" 
-                        data-price="${option.price}"
-                        data-carrier="${option.carrierName}"
-                        data-service="${option.serviceName}"
-                        data-delivery="${deliveryInfo}"
-                        data-is-dropoff="${option.isDropOff ? "yes" : "no"}">
-                    ${packlink_custom.select_button_text}
+                    data-id="${option.id}"
+                    data-price="${option.price}"
+                    data-carrier="${option.carrierName}"
+                    data-service="${option.serviceName}"
+                    data-is-dropoff="${option.isDropOff ? 'yes' : 'no'}">
+                    ${packlink_custom.select_button_text || 'Select this service'}
                 </button>
-            </li>
-        `;
+            `;
+
+            // Add click handler for shipping selection
+            const selectButton = li.querySelector('.select-shipping');
+            selectButton.addEventListener('click', () => {
+                // Store selected shipping option
+                selectedShippingOptions[routeIndex] = {
+                    id: option.id,
+                    price: option.price,
+                    carrier: option.carrierName,
+                    service: option.serviceName,
+                    isDropOff: option.isDropOff
+                };
+
+                // Remove selected class from all options
+                optionsList.querySelectorAll('li').forEach(opt => opt.classList.remove('selected'));
+                // Add selected class to clicked option
+                li.classList.add('selected');
+                
+                if (option.isDropOff) {
+                    showDropOffPicker(option.id, routeIndex);
+                }
+                
+                // Check if all routes have shipping options
+                checkAllRoutesHaveShipping();
+            });
+
+            optionsList.appendChild(li);
         });
 
-        html += "</ul>";
-        $(`#shipping-options-list-${routeIndex}`).html(html);
+        container.appendChild(optionsList);
 
-        // Add click handler for shipping selection
-        $(`#shipping-options-list-${routeIndex} .select-shipping`).on("click", function (e) {
-            // Prevent any default action
-            e.preventDefault();
-            e.stopPropagation();
+        // Add "Show More" button if there are more than 6 options
+        if (options.length > 6) {
+            const showMoreButton = document.createElement('button');
+            showMoreButton.className = 'show-more-shipping';
+            showMoreButton.type = 'button'; // Add this to prevent form submission
+            showMoreButton.innerHTML = `
+                ${packlink_custom.show_more_text || 'Show More Options'}
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+            `;
 
-            // Store selected shipping option
-            selectedShippingOptions[routeIndex] = {
-                id: $(this).data("id"),
-                price: $(this).data("price"),
-                carrier: $(this).data("carrier"),
-                service: $(this).data("service"),
-                delivery: $(this).data("delivery"),
-                isDropOff: $(this).data("is-dropoff") === "yes"
-            };
+            let expanded = false;
+            showMoreButton.addEventListener('click', (e) => {
+                // Prevent default behavior and stop propagation
+                e.preventDefault();
+                e.stopPropagation();
+                
+                const hiddenOptions = container.querySelectorAll('.hidden-option');
+                hiddenOptions.forEach(option => option.classList.toggle('show'));
+                expanded = !expanded;
+                showMoreButton.classList.toggle('expanded');
+                showMoreButton.innerHTML = expanded ? `
+                    ${packlink_custom.show_less_text || 'Show Less Options'}
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                ` : `
+                    ${packlink_custom.show_more_text || 'Show More Options'}
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                `;
 
-            // Highlight selected option
-            $(`#shipping-options-list-${routeIndex} li`).removeClass("selected");
-            $(this).closest("li").addClass("selected");
+                return false; // Add this to ensure the event doesn't bubble up
+            });
 
-            // If this is a drop-off method, show the drop-off picker
-            if (selectedShippingOptions[routeIndex].isDropOff) {
-                showDropOffPicker(selectedShippingOptions[routeIndex].id, routeIndex);
-            }
-
-            // Check if all routes have shipping options
-            checkAllRoutesHaveShipping();
-        });
+            container.appendChild(showMoreButton);
+        }
 
         // If there was a previously selected option, reselect it
         if (selectedShippingOptions[routeIndex]) {
-            $(`#shipping-options-list-${routeIndex} li[data-method-id="${selectedShippingOptions[routeIndex].id}"]`).addClass("selected");
+            const selectedOption = optionsList.querySelector(`[data-id="${selectedShippingOptions[routeIndex].id}"]`);
+            if (selectedOption) {
+                selectedOption.closest('li').classList.add('selected');
+            }
         }
-
-        // Check if all routes have shipping options
-        checkAllRoutesHaveShipping();
     }
 
     // Format price
