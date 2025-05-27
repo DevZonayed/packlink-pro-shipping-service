@@ -1166,9 +1166,6 @@
   transform: translateX(20px);
 }
 
-
-
-
 /* TRACKING */
 .packlink-tracking-container {
     max-width: 800px;
@@ -1415,4 +1412,214 @@
         width: auto;
         margin-bottom: 5px;
     }
+}
+
+/* Country Search Styles */
+.country-search-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.country-search {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+.country-search:focus {
+    border-color: #4a90e2;
+    box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
+}
+
+.country-options {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    max-height: 200px;
+    overflow-y: auto;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+}
+
+.country-options.active {
+    display: block;
+}
+
+.country-option {
+    padding: 8px 12px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.country-option:hover {
+    background-color: #f5f5f5;
+}
+
+.country-option.selected {
+    background-color: #e3f2fd;
+}
+
+/* Improved Shipping Options Styles */
+.shipping-options {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+    padding: 0;
+    list-style: none;
+}
+
+.shipping-options li {
+    background: white;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 15px;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.shipping-options li:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.shipping-options li.selected {
+    border: 2px solid #4a90e2;
+    background-color: #f8fbff;
+}
+
+.option-details {
+    display: flex;
+    align-items: flex-start;
+    gap: 15px;
+}
+
+.option-details img {
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+    border-radius: 4px;
+}
+
+.option-info {
+    flex: 1;
+}
+
+.option-info h4 {
+    margin: 0 0 5px;
+    font-size: 16px;
+    color: #333;
+}
+
+.option-info p {
+    margin: 0;
+    font-size: 14px;
+    color: #666;
+}
+
+.option-price {
+    font-size: 18px;
+    font-weight: 600;
+    color: #2c3e50;
+    margin-top: 10px;
+}
+
+.select-shipping {
+    width: 100%;
+    padding: 8px;
+    background-color: #4a90e2;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    margin-top: auto;
+}
+
+.select-shipping:hover {
+    background-color: #357abd;
+}
+
+.drop-off-indicator {
+    display: inline-block;
+    padding: 4px 8px;
+    background-color: #f8f9fa;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    font-size: 12px;
+    color: #666;
+    margin-top: 5px;
+}
+
+.drop-off-indicator.drop-off-selected {
+    background-color: #e3f2fd;
+    border-color: #4a90e2;
+    color: #4a90e2;
+}
+
+/* Responsive Improvements */
+@media (max-width: 768px) {
+    .shipping-options {
+        grid-template-columns: 1fr;
+    }
+
+    .option-details {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    .option-price {
+        text-align: center;
+    }
+}
+
+/* Show More Button Styles */
+.show-more-shipping {
+    width: 100%;
+    padding: 12px;
+    background-color: var(--color-white);
+    border: 2px dashed var(--color-primary);
+    color: var(--color-primary);
+    font-weight: 500;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 20px;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.show-more-shipping:hover {
+    background-color: var(--color-primary-light);
+}
+
+.show-more-shipping svg {
+    width: 20px;
+    height: 20px;
+    transition: transform 0.3s ease;
+}
+
+.show-more-shipping.expanded svg {
+    transform: rotate(180deg);
+}
+
+.shipping-options li.hidden-option {
+    display: none;
+}
+
+.shipping-options li.hidden-option.show {
+    display: flex;
 }

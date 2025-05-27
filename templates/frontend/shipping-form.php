@@ -190,9 +190,11 @@
                     <h4><?php _e('Origin', 'packlink-custom-shipping'); ?></h4>
                     <div class="form-group">
                         <label for="origin_country_{ROUTE_INDEX}"><?php _e('Country', 'packlink-custom-shipping'); ?></label>
-                        <select name="origin_country_{ROUTE_INDEX}" id="origin_country_{ROUTE_INDEX}" required>
-                            <option value=""><?php _e('Select country', 'packlink-custom-shipping'); ?></option>
-                        </select>
+                        <div class="country-search-wrapper">
+                            <input type="text" class="country-search" id="origin_country_search_{ROUTE_INDEX}" placeholder="<?php _e('Search country', 'packlink-custom-shipping'); ?>" autocomplete="off">
+                            <input type="hidden" name="origin_country_{ROUTE_INDEX}" id="origin_country_{ROUTE_INDEX}" required>
+                            <div class="country-options" id="origin_country_options_{ROUTE_INDEX}"></div>
+                        </div>
                     </div>
 
                     <div class="form-group">
@@ -211,9 +213,11 @@
                     <h4><?php _e('Destination', 'packlink-custom-shipping'); ?></h4>
                     <div class="form-group">
                         <label for="destination_country_{ROUTE_INDEX}"><?php _e('Country', 'packlink-custom-shipping'); ?></label>
-                        <select name="destination_country_{ROUTE_INDEX}" id="destination_country_{ROUTE_INDEX}" required>
-                            <option value=""><?php _e('Select country', 'packlink-custom-shipping'); ?></option>
-                        </select>
+                        <div class="country-search-wrapper">
+                            <input type="text" class="country-search" id="destination_country_search_{ROUTE_INDEX}" placeholder="<?php _e('Search country', 'packlink-custom-shipping'); ?>" autocomplete="off">
+                            <input type="hidden" name="destination_country_{ROUTE_INDEX}" id="destination_country_{ROUTE_INDEX}" required>
+                            <div class="country-options" id="destination_country_options_{ROUTE_INDEX}"></div>
+                        </div>
                     </div>
                     <div class="form-group">
                         <label for="destination_postal_code_{ROUTE_INDEX}"><?php _e('Postal Code', 'packlink-custom-shipping'); ?></label>
