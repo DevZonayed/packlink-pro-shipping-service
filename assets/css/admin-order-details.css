@@ -1,0 +1,95 @@
+/* Packlink shipping details styling for admin */
+.packlink-admin-order-details {
+    margin: 1.5em 0;
+    padding: 1em;
+    border: 1px solid #e2e4e7;
+    border-radius: 3px;
+    background-color: #f8f9fa;
+}
+
+.packlink-admin-order-details .packlink-shipping-details {
+    border: none;
+    padding: 0;
+    margin: 0;
+    background-color: transparent;
+}
+
+.packlink-admin-order-details h3 {
+    margin-top: 0;
+    margin-bottom: 0.8em;
+    font-size: 14px;
+    font-weight: 600;
+    color: #23282d;
+}
+
+.packlink-admin-order-details h4 {
+    margin: 1.2em 0 0.5em;
+    font-size: 13px;
+    font-weight: 600;
+    color: #23282d;
+    border-bottom: 1px solid #e2e4e7;
+    padding-bottom: 0.5em;
+}
+
+.packlink-admin-order-details h5 {
+    margin: 1em 0 0.3em;
+    font-size: 12px;
+    font-weight: 600;
+    color: #23282d;
+}
+
+.packlink-admin-order-details h6 {
+    font-size: 12px;
+    margin: 0.5em 0;
+    font-weight: 600;
+    color: #555;
+}
+
+.packlink-admin-order-details p {
+    margin: 0.3em 0;
+    font-size: 12px;
+}
+
+.packlink-admin-order-details .packlink-route {
+    margin-bottom: 1.2em;
+    padding-bottom: 1em;
+    border-bottom: 1px dashed #e2e4e7;
+}
+
+.packlink-admin-order-details .packlink-route:last-child {
+    border-bottom: none;
+}
+
+.packlink-admin-order-details .packlink-package {
+    margin-bottom: 0.8em;
+}
+
+.packlink-admin-order-details .packlink-contacts {
+    display: flex;
+    flex-wrap: wrap;
+    margin: 0.8em 0;
+}
+
+.packlink-admin-order-details .packlink-sender, 
+.packlink-admin-order-details .packlink-recipient {
+    flex: 1;
+    min-width: 150px;
+    margin-right: 1em;
+    margin-bottom: 0.8em;
+    padding: 0.6em;
+    background-color: #f0f0f1;
+    border-radius: 3px;
+}
+
+.packlink-admin-order-details .packlink-drop-off {
+    margin-top: 0.8em;
+    padding: 0.6em;
+    background-color: #f0f0f1;
+    border-radius: 3px;
+}
+
+.packlink-admin-order-details .packlink-total-price {
+    font-weight: 600;
+    font-size: 12px;
+    color: #23282d;
+} 

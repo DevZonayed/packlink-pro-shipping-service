@@ -94,6 +94,10 @@ class Packlink_Init
         // Load frontend classes
         require_once PACKLINK_CUSTOM_PLUGIN_DIR . 'includes/frontend/class-checkout.php';
         require_once PACKLINK_CUSTOM_PLUGIN_DIR . 'includes/frontend/class-form.php';
+        require_once PACKLINK_CUSTOM_PLUGIN_DIR . 'includes/frontend/class-order-display.php';
+
+        // Initialize order display
+        Packlink_Order_Display::init();
 
         // Register frontend scripts
         add_action('wp_enqueue_scripts', array(self::class, 'register_frontend_scripts'));
@@ -147,6 +151,9 @@ class Packlink_Init
         add_action('woocommerce_order_actions', array('Packlink_Checkout', 'add_order_actions'));
         add_action('woocommerce_order_action_packlink_create_shipment', array('Packlink_Checkout', 'process_order_action_create_shipment'));
         add_action('woocommerce_order_action_packlink_create_all_shipments', array('Packlink_Checkout', 'process_order_action_create_all_shipments'));
+
+        // Populate checkout fields with sender information from Route #1
+        add_action('woocommerce_before_checkout_form', array('Packlink_Checkout', 'populate_checkout_fields'));
     }
 
     /**

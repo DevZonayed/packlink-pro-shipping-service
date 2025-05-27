@@ -1,8 +1,9 @@
 <?php
+
 /**
  * Plugin Name: Packlink Custom Shipping Extension
  * Description: Custom integration with Packlink PRO shipping API
- * Version: 1.0.9
+ * Version: 1.0.12
  * Author: Jonayed Ahamed
  * Requires at least: 5.0
  * Requires PHP: 7.2
@@ -31,7 +32,8 @@ define('PACKLINK_CUSTOM_PLUGIN_BASENAME', plugin_basename(__FILE__));
  * @param string $class_name Class name to load.
  * @return void
  */
-function packlink_custom_autoloader($class_name) {
+function packlink_custom_autoloader($class_name)
+{
     // Exit if the class doesn't start with our prefix
     if (strpos($class_name, 'Packlink_') !== 0) {
         return;
@@ -39,7 +41,7 @@ function packlink_custom_autoloader($class_name) {
 
     // Convert class name to file path format
     $class_file = 'class-' . str_replace('_', '-', strtolower(substr($class_name, 9))) . '.php';
-    
+
     // Try to load from different directories
     $dirs = [
         'admin' => PACKLINK_CUSTOM_PLUGIN_DIR . 'includes/admin/',
@@ -49,7 +51,7 @@ function packlink_custom_autoloader($class_name) {
         // Backward compatibility
         'root' => PACKLINK_CUSTOM_PLUGIN_DIR . 'includes/',
     ];
-    
+
     foreach ($dirs as $dir) {
         $file = $dir . $class_file;
         if (file_exists($file)) {
@@ -69,7 +71,8 @@ add_action('plugins_loaded', 'packlink_custom_init');
  *
  * @return void
  */
-function packlink_custom_init() {
+function packlink_custom_init()
+{
     // Check if WooCommerce is active
     if (!class_exists('WooCommerce')) {
         add_action('admin_notices', 'packlink_custom_woocommerce_notice');
@@ -85,12 +88,14 @@ function packlink_custom_init() {
  *
  * @return void
  */
-function packlink_custom_woocommerce_notice() {
-    ?>
-    <div class="error">
-        <p><?php _e('Packlink Custom Shipping Extension requires WooCommerce to be installed and activated.', 'packlink-custom-shipping'); ?></p>
-    </div>
-    <?php
+function packlink_custom_woocommerce_notice()
+{
+?>
+<div class="error">
+    <p><?php _e('Packlink Custom Shipping Extension requires WooCommerce to be installed and activated.', 'packlink-custom-shipping'); ?>
+    </p>
+</div>
+<?php
 }
 
 /**
@@ -98,7 +103,8 @@ function packlink_custom_woocommerce_notice() {
  *
  * @return void
  */
-function packlink_custom_load_textdomain() {
+function packlink_custom_load_textdomain()
+{
     load_plugin_textdomain('packlink-custom-shipping', false, dirname(plugin_basename(__FILE__)) . '/languages');
 }
 add_action('init', 'packlink_custom_load_textdomain');

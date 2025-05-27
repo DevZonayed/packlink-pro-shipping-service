@@ -1,0 +1,212 @@
+/* Packlink shipping details styling for frontend */
+.packlink-shipping-details {
+    margin: 2em 0;
+    padding: 1em;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background-color: #f8f8f8;
+}
+
+.packlink-shipping-details h3 {
+    margin-top: 0;
+    margin-bottom: 1em;
+    font-size: 1.3em;
+    color: #333;
+}
+
+.packlink-shipping-details h4 {
+    margin: 1.5em 0 0.5em;
+    font-size: 1.1em;
+    color: #444;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 0.5em;
+}
+
+.packlink-shipping-details h5 {
+    margin: 1em 0 0.5em;
+    font-size: 1em;
+    color: #555;
+}
+
+.packlink-shipping-details h6 {
+    font-size: 0.9em;
+    margin: 0.5em 0;
+    font-weight: 600;
+    color: #666;
+}
+
+.packlink-route {
+    margin-bottom: 1.5em;
+    padding-bottom: 1em;
+    border-bottom: 1px dashed #ddd;
+}
+
+.packlink-route:last-child {
+    border-bottom: none;
+}
+
+.packlink-package {
+    margin-bottom: 1em;
+}
+
+.packlink-contacts {
+    display: flex;
+    flex-wrap: wrap;
+    margin: 1em 0;
+    gap: 1em;
+}
+
+.packlink-contact-box {
+    flex: 1;
+    min-width: 200px;
+    margin-bottom: 1em;
+    padding: 0.8em;
+    background-color: #f1f1f1;
+    border-radius: 3px;
+}
+
+.packlink-contact-box h6 {
+    margin-top: 0;
+    margin-bottom: 0.5em;
+}
+
+.packlink-contact-box p {
+    margin: 0.3em 0;
+    line-height: 1.4;
+}
+
+.packlink-drop-off {
+    margin-top: 1em;
+    padding: 0.8em;
+    background-color: #f1f1f1;
+    border-radius: 3px;
+}
+
+.packlink-total-price {
+    font-weight: 600;
+    font-size: 1.1em;
+    color: #333;
+}
+
+@media (max-width: 768px) {
+    .packlink-contacts {
+        flex-direction: column;
+    }
+    
+    .packlink-contact-box {
+        margin-right: 0;
+    }
+}
+
+/* Styles for checkout review section */
+.packlink-checkout-review {
+    margin: 1.5em 0;
+    padding: 1em;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background-color: #f8f8f8;
+    font-size: 0.95em;
+}
+
+.packlink-checkout-review h3 {
+    margin-top: 0;
+    margin-bottom: 1em;
+    font-size: 1.2em;
+    color: #333;
+}
+
+.packlink-checkout-review h4 {
+    margin: 1.2em 0 0.5em;
+    font-size: 1em;
+    color: #444;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 0.5em;
+}
+
+.packlink-checkout-review h5 {
+    margin: 0.8em 0 0.3em;
+    font-size: 0.9em;
+    font-weight: 600;
+    color: #555;
+}
+
+.packlink-checkout-review h6 {
+    font-size: 0.9em;
+    margin: 0.5em 0;
+    font-weight: 600;
+    color: #666;
+}
+
+.packlink-checkout-review p {
+    margin: 0.3em 0;
+    font-size: 0.9em;
+    line-height: 1.4;
+}
+
+.packlink-checkout-route {
+    margin-bottom: 1.2em;
+    padding-bottom: 1em;
+    border-bottom: 1px dashed #ddd;
+}
+
+.packlink-checkout-route:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+}
+
+.packlink-checkout-package {
+    margin-bottom: 0.8em;
+}
+
+.packlink-checkout-package:last-child {
+    margin-bottom: 0;
+}
+
+.packlink-checkout-review .packlink-contacts {
+    display: flex;
+    flex-wrap: wrap;
+    margin: 1em 0;
+    gap: 1em;
+}
+
+.packlink-checkout-review .packlink-contact-box {
+    flex: 1;
+    min-width: 200px;
+    margin-bottom: 0.8em;
+    padding: 0.8em;
+    background-color: #f1f1f1;
+    border-radius: 3px;
+}
+
+.packlink-checkout-review .packlink-contact-box h6 {
+    margin-top: 0;
+    margin-bottom: 0.5em;
+}
+
+.packlink-checkout-review .packlink-contact-box p {
+    margin: 0.3em 0;
+    line-height: 1.4;
+}
+
+.packlink-checkout-review .packlink-drop-off {
+    margin-top: 1em;
+    padding: 0.8em;
+    background-color: #f1f1f1;
+    border-radius: 3px;
+}
+
+.packlink-checkout-review .packlink-total-price {
+    font-weight: 600;
+    font-size: 1.1em;
+    color: #333;
+}
+
+@media (max-width: 768px) {
+    .packlink-checkout-review .packlink-contacts {
+        flex-direction: column;
+    }
+    
+    .packlink-checkout-review .packlink-contact-box {
+        margin-right: 0;
+    }
+} 
