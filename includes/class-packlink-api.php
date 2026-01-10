@@ -95,8 +95,8 @@ class Packlink_API {
     private function request($method, $endpoint, $params = [], $data = null) {
         if (empty($this->api_key)) {
             return new WP_Error(
-                'packlink_api_error', 
-                __('Packlink API key is not set', 'packlink-custom-shipping')
+                'shipping_service_error', 
+                __('Shipping service is not properly configured. Please contact the site administrator.', 'packlink-custom-shipping')
             );
         }
         
@@ -143,14 +143,21 @@ class Packlink_API {
         if ($response_code >= 400) {
             $error_message = $this->parse_error_message($response_body);
             
+            // Log technical details only in debug mode
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                $this->log_error(sprintf('API error (%d): %s', $response_code, $error_message));
+            }
+            
+            // Return user-friendly error message (no Packlink branding)
+            $user_friendly_message = __('Unable to retrieve shipping options. Please try again or contact support if the issue persists.', 'packlink-custom-shipping');
+            
             return new WP_Error(
-                'packlink_api_error',
-                sprintf(
-                    __('Packlink API error (%d): %s', 'packlink-custom-shipping'),
-                    $response_code,
-                    $error_message
-                ),
-                ['status' => $response_code]
+                'shipping_service_error',
+                $user_friendly_message,
+                [
+                    'status' => $response_code,
+                    'technical_details' => (defined('WP_DEBUG') && WP_DEBUG) ? $error_message : null
+                ]
             );
         }
         

@@ -488,9 +488,27 @@ class Packlink_Checkout
 
         // Check if we have Packlink shipping in the session
         $shipping_price = WC()->session->get('packlink_shipping_price');
+        $shipping_currency = WC()->session->get('packlink_shipping_currency');
 
         if ($shipping_price) {
-            $cart->add_fee(__('Packlink Shipping', 'packlink-custom-shipping'), $shipping_price);
+            $converted_price = $shipping_price;
+            
+            // Only convert if we have currency handler and the stored currency differs from current
+            if (class_exists('Packlink_Currency_Handler')) {
+                $current_currency = Packlink_Currency_Handler::get_current_currency();
+                
+                // If no shipping currency is stored, assume it's in the default currency (EUR)
+                if (!$shipping_currency) {
+                    $shipping_currency = 'EUR';
+                }
+                
+                // Convert price if currencies don't match
+                if ($shipping_currency !== $current_currency) {
+                    $converted_price = Packlink_Currency_Handler::convert_price($shipping_price, $shipping_currency, $current_currency);
+                }
+            }
+            
+            $cart->add_fee(__('Reluggz Shipping', 'packlink-custom-shipping'), $converted_price);
         }
     }
 
@@ -672,12 +690,20 @@ class Packlink_Checkout
         ));
 
         if (!empty($products)) {
-            return $products[0]->get_id();
+            $product = $products[0];
+            
+            // Ensure product name is updated to Reluggz Shipping if it was previously Packlink Shipping
+            if ($product->get_name() !== 'Reluggz Shipping') {
+                $product->set_name('Reluggz Shipping');
+                $product->save();
+            }
+            
+            return $product->get_id();
         }
 
         // Create a new product
         $product = new WC_Product_Simple();
-        $product->set_name('Packlink Shipping');
+        $product->set_name('Reluggz Shipping');
         $product->set_status('publish');
         $product->set_catalog_visibility('hidden');
         $product->set_price(0);

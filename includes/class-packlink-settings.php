@@ -38,6 +38,11 @@ class Packlink_Settings
         register_setting('packlink_shipping_settings', 'packlink_commission_type');
         register_setting('packlink_shipping_settings', 'packlink_commission_fixed_amount');
         register_setting('packlink_shipping_settings', 'packlink_commission_percentage');
+
+        // Currency Settings
+        register_setting('packlink_currency_settings', 'packlink_default_currency');
+        register_setting('packlink_currency_settings', 'packlink_multi_currency_enabled');
+        register_setting('packlink_currency_settings', 'packlink_currency_display_notice');
     }
     /**
      * Add menu page
@@ -70,6 +75,15 @@ class Packlink_Settings
             'manage_options',
             'packlink-shipping-settings',
             [self::class, 'render_shipping_settings_page']
+        );
+
+        add_submenu_page(
+            'packlink-settings',
+            __('Currency Settings', 'packlink-custom-shipping'),
+            __('Currency Settings', 'packlink-custom-shipping'),
+            'manage_options',
+            'packlink-currency-settings',
+            [self::class, 'render_currency_settings_page']
         );
     }
     /**
@@ -368,6 +382,184 @@ class Packlink_Settings
 
             .packlink-dimension input {
                 width: 80px;
+            }
+        </style>
+    <?php
+    }
+
+    /**
+     * Render currency settings page
+     */
+    public static function render_currency_settings_page()
+    {
+        $woocs_active = class_exists('WOOCS') && isset($GLOBALS['WOOCS']);
+        $is_multi_currency_available = $woocs_active && $GLOBALS['WOOCS']->is_multiple_allowed;
+    ?>
+        <div class="wrap">
+            <h1><?php echo esc_html(get_admin_page_title()); ?></h1>
+
+            <?php if (!$woocs_active): ?>
+                <div class="notice notice-warning">
+                    <p>
+                        <?php _e('Multi-currency support requires the FOX - Currency Switcher Professional for WooCommerce plugin to be installed and activated.', 'packlink-custom-shipping'); ?>
+                        <a href="https://wordpress.org/plugins/woocommerce-currency-switcher/" target="_blank"><?php _e('Download Plugin', 'packlink-custom-shipping'); ?></a>
+                    </p>
+                </div>
+            <?php elseif (!$is_multi_currency_available): ?>
+                <div class="notice notice-warning">
+                    <p>
+                        <?php _e('Multi-currency is not enabled in your Currency Switcher plugin. Please enable "Is Multiple Currency" option in Currency Switcher settings.', 'packlink-custom-shipping'); ?>
+                        <a href="<?php echo admin_url('admin.php?page=woocs'); ?>" target="_blank"><?php _e('Currency Switcher Settings', 'packlink-custom-shipping'); ?></a>
+                    </p>
+                </div>
+            <?php else: ?>
+                <div class="notice notice-success">
+                    <p>
+                        <?php _e('Multi-currency support is active! Your Packlink shipping rates will automatically convert to the selected currency.', 'packlink-custom-shipping'); ?>
+                    </p>
+                </div>
+            <?php endif; ?>
+
+            <form method="post" action="options.php">
+                <?php settings_fields('packlink_currency_settings'); ?>
+                <?php do_settings_sections('packlink_currency_settings'); ?>
+
+                <table class="form-table">
+                    <tr valign="top">
+                        <th scope="row"><?php _e('Default Currency', 'packlink-custom-shipping'); ?></th>
+                        <td>
+                            <select name="packlink_default_currency" <?php echo !$woocs_active ? 'disabled' : ''; ?>>
+                                <?php
+                                $default_currency = get_option('packlink_default_currency', 'EUR');
+                                $currencies = [
+                                    'EUR' => 'Euro (€)',
+                                    'USD' => 'US Dollar ($)',
+                                    'GBP' => 'British Pound (£)',
+                                    'JPY' => 'Japanese Yen (¥)',
+                                    'CAD' => 'Canadian Dollar (C$)',
+                                    'AUD' => 'Australian Dollar (A$)',
+                                    'CHF' => 'Swiss Franc (CHF)',
+                                    'SEK' => 'Swedish Krona (kr)',
+                                    'NOK' => 'Norwegian Krone (kr)',
+                                    'DKK' => 'Danish Krone (kr)',
+                                    'PLN' => 'Polish Złoty (zł)',
+                                    'CZK' => 'Czech Koruna (Kč)',
+                                    'HUF' => 'Hungarian Forint (Ft)'
+                                ];
+
+                                if ($woocs_active) {
+                                    $woocs_currencies = $GLOBALS['WOOCS']->get_currencies();
+                                    if (!empty($woocs_currencies)) {
+                                        $currencies = [];
+                                        foreach ($woocs_currencies as $code => $currency) {
+                                            $currencies[$code] = $currency['name'] . ' (' . $currency['symbol'] . ')';
+                                        }
+                                    }
+                                }
+
+                                foreach ($currencies as $code => $name) {
+                                    echo '<option value="' . esc_attr($code) . '" ' . selected($default_currency, $code, false) . '>' . esc_html($name) . '</option>';
+                                }
+                                ?>
+                            </select>
+                            <p class="description">
+                                <?php _e('This is the base currency that Packlink API returns. Prices will be converted from this currency to the customer\'s selected currency.', 'packlink-custom-shipping'); ?>
+                            </p>
+                        </td>
+                    </tr>
+
+                    <tr valign="top">
+                        <th scope="row"><?php _e('Currency Display Notice', 'packlink-custom-shipping'); ?></th>
+                        <td>
+                            <label>
+                                <input type="checkbox" name="packlink_currency_display_notice" value="yes" <?php checked(get_option('packlink_currency_display_notice', 'no'), 'yes'); ?> <?php echo !$is_multi_currency_available ? 'disabled' : ''; ?> />
+                                <?php _e('Show currency information in shipping form', 'packlink-custom-shipping'); ?>
+                            </label>
+                            <p class="description"><?php _e('Display current currency and conversion notice to customers.', 'packlink-custom-shipping'); ?></p>
+                        </td>
+                    </tr>
+
+                    <?php if ($woocs_active): ?>
+                        <tr valign="top">
+                            <th scope="row"><?php _e('Available Currencies', 'packlink-custom-shipping'); ?></th>
+                            <td>
+                                <?php
+                                $woocs_currencies = $GLOBALS['WOOCS']->get_currencies();
+                                if (!empty($woocs_currencies)) {
+                                    echo '<div class="packlink-currency-list">';
+                                    foreach ($woocs_currencies as $code => $currency) {
+                                        $is_default = isset($currency['is_etalon']) && $currency['is_etalon'];
+                                        echo '<div class="currency-item">';
+                                        echo '<span class="currency-code">' . esc_html($code) . '</span>';
+                                        echo '<span class="currency-name">' . esc_html($currency['name']) . '</span>';
+                                        echo '<span class="currency-symbol">' . esc_html($currency['symbol']) . '</span>';
+                                        echo '<span class="currency-rate">Rate: ' . esc_html($currency['rate']) . '</span>';
+                                        if ($is_default) {
+                                            echo '<span class="currency-default">' . __('(Default)', 'packlink-custom-shipping') . '</span>';
+                                        }
+                                        echo '</div>';
+                                    }
+                                    echo '</div>';
+                                }
+                                ?>
+                                <p class="description">
+                                    <?php _e('These are the currencies configured in your Currency Switcher plugin.', 'packlink-custom-shipping'); ?>
+                                    <a href="<?php echo admin_url('admin.php?page=woocs'); ?>" target="_blank"><?php _e('Manage Currencies', 'packlink-custom-shipping'); ?></a>
+                                </p>
+                            </td>
+                        </tr>
+                    <?php endif; ?>
+                </table>
+
+                <?php submit_button(); ?>
+            </form>
+        </div>
+
+        <style>
+            .packlink-currency-list {
+                max-height: 300px;
+                overflow-y: auto;
+                border: 1px solid #ddd;
+                padding: 10px;
+                background: #f9f9f9;
+                border-radius: 4px;
+            }
+
+            .currency-item {
+                padding: 8px 0;
+                border-bottom: 1px solid #eee;
+                display: flex;
+                gap: 15px;
+                align-items: center;
+            }
+
+            .currency-item:last-child {
+                border-bottom: none;
+            }
+
+            .currency-code {
+                font-weight: bold;
+                min-width: 50px;
+            }
+
+            .currency-name {
+                flex: 1;
+            }
+
+            .currency-symbol {
+                font-weight: bold;
+                color: #0073aa;
+            }
+
+            .currency-rate {
+                color: #666;
+                font-size: 12px;
+            }
+
+            .currency-default {
+                color: #d63638;
+                font-weight: bold;
+                font-size: 12px;
             }
         </style>
 <?php

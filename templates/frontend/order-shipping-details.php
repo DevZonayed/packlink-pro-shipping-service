@@ -33,7 +33,7 @@ if (empty($routes_info) && empty($packages_info)) {
 ?>
 
 <div class="packlink-shipping-details">
-    <h3><?php esc_html_e('Packlink Shipping Details', 'packlink-custom-shipping'); ?></h3>
+    <h3><?php esc_html_e('Reluggz Shipping Details', 'packlink-custom-shipping'); ?></h3>
 
     <?php if (!empty($routes_info) && is_array($routes_info)) : ?>
         <h4><?php esc_html_e('Routes Information', 'packlink-custom-shipping'); ?></h4>

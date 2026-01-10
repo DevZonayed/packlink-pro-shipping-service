@@ -1,4 +1,5 @@
 <?php
+
 /**
  * AJAX handler class
  *
@@ -12,13 +13,15 @@ if (!defined('ABSPATH')) {
 /**
  * Class to handle AJAX operations for Packlink
  */
-class Packlink_Ajax {
+class Packlink_Ajax
+{
     /**
      * Initialize AJAX hooks
      *
      * @return void
      */
-    public static function init() {
+    public static function init()
+    {
         // Register AJAX handlers
         add_action('wp_ajax_get_packlink_shipping_rates', array(self::class, 'get_shipping_rates'));
         add_action('wp_ajax_nopriv_get_packlink_shipping_rates', array(self::class, 'get_shipping_rates'));
@@ -28,34 +31,35 @@ class Packlink_Ajax {
 
         add_action('wp_ajax_add_packlink_shipping_to_cart', array(self::class, 'add_shipping_to_cart'));
         add_action('wp_ajax_nopriv_add_packlink_shipping_to_cart', array(self::class, 'add_shipping_to_cart'));
-        
+
         // AJAX handlers for both logged in and non-logged in users
         add_action('wp_ajax_packlink_get_destinations', array(self::class, 'get_destinations'));
         add_action('wp_ajax_nopriv_packlink_get_destinations', array(self::class, 'get_destinations'));
-        
+
         // AJAX handler for postal code search
         add_action('wp_ajax_packlink_search_postal_code', array(self::class, 'search_postal_code'));
         add_action('wp_ajax_nopriv_packlink_search_postal_code', array(self::class, 'search_postal_code'));
-        
+
         // AJAX handler for postal code suggestions
         add_action('wp_ajax_packlink_suggest_postal_codes', array(self::class, 'suggest_postal_codes'));
         add_action('wp_ajax_nopriv_packlink_suggest_postal_codes', array(self::class, 'suggest_postal_codes'));
-        
+
         // AJAX handler for getting formatted destinations
         add_action('wp_ajax_packlink_get_formatted_destinations', array(self::class, 'get_formatted_destinations'));
         add_action('wp_ajax_nopriv_packlink_get_formatted_destinations', array(self::class, 'get_formatted_destinations'));
-        
+
         // Add tracking AJAX handler
         add_action('wp_ajax_packlink_get_tracking', array(self::class, 'get_tracking_info'));
         add_action('wp_ajax_nopriv_packlink_get_tracking', array(self::class, 'get_tracking_info'));
     }
-    
+
     /**
      * Get shipping rates via AJAX
      *
      * @return void
      */
-    public static function get_shipping_rates() {
+    public static function get_shipping_rates()
+    {
         try {
             // Verify nonce
             if (!check_ajax_referer('packlink_shipping_nonce', 'nonce', false)) {
@@ -177,6 +181,20 @@ class Packlink_Ajax {
                 );
             }
 
+            // Convert shipping rates to current currency
+            $formatted_options = Packlink_Currency_Handler::convert_shipping_rates($formatted_options);
+
+            // Add currency information to each shipping option for compatibility
+            foreach ($formatted_options as &$option) {
+                $option['currency_info'] = array(
+                    'current_currency' => Packlink_Currency_Handler::get_current_currency(),
+                    'symbol' => Packlink_Currency_Handler::get_currency_symbol(),
+                    'position' => Packlink_Currency_Handler::get_currency_position(),
+                    'is_multi_currency_active' => Packlink_Currency_Handler::is_multi_currency_active()
+                );
+            }
+
+            // Return the formatted options directly to maintain JavaScript compatibility
             wp_send_json_success($formatted_options);
         } catch (Exception $e) {
             wp_send_json_error(array(
@@ -191,7 +209,8 @@ class Packlink_Ajax {
      *
      * @return void
      */
-    public static function get_drop_off_locations() {
+    public static function get_drop_off_locations()
+    {
         try {
             // Verify nonce
             if (!check_ajax_referer('packlink_shipping_nonce', 'nonce', false)) {
@@ -231,7 +250,8 @@ class Packlink_Ajax {
      *
      * @return void
      */
-    public static function add_shipping_to_cart() {
+    public static function add_shipping_to_cart()
+    {
         try {
             // Verify nonce
             if (!check_ajax_referer('packlink_shipping_nonce', 'nonce', false)) {
@@ -260,12 +280,44 @@ class Packlink_Ajax {
 
             // Store shipping details in session
             WC()->session->set('packlink_shipping_details', $shipping_details);
-            WC()->session->set('packlink_shipping_price', $shipping_details['total_price']);
+            
+            // Store shipping price with currency information
+            $shipping_price = floatval($shipping_details['total_price']);
+            $shipping_currency = isset($shipping_details['currency']) ? $shipping_details['currency'] : 'EUR';
+            
+            // Store the price as-is since it's already in the current currency
+            WC()->session->set('packlink_shipping_price', $shipping_price);
+            WC()->session->set('packlink_shipping_currency', $shipping_currency);
+
+            // Extract billing data from the first route's sender info
+            if (isset($shipping_details['routes'][0])) {
+                $first_route = $shipping_details['routes'][0];
+                
+                // Parse sender name into first and last name
+                $sender_name = isset($first_route['sender_name']) ? $first_route['sender_name'] : '';
+                $name_parts = explode(' ', $sender_name, 2);
+                $first_name = $name_parts[0];
+                $last_name = isset($name_parts[1]) ? $name_parts[1] : '';
+
+                $billing_data = array(
+                    'billing_first_name' => $first_name,
+                    'billing_last_name'  => $last_name,
+                    'billing_email'      => isset($first_route['sender_email']) ? $first_route['sender_email'] : '',
+                    'billing_phone'      => isset($first_route['sender_phone']) ? $first_route['sender_phone'] : '',
+                    'billing_company'    => isset($first_route['sender_company']) ? $first_route['sender_company'] : '',
+                    'billing_address_1'  => isset($first_route['origin_address']) ? $first_route['origin_address'] : '',
+                    'billing_city'       => isset($first_route['origin_city']) ? $first_route['origin_city'] : '',
+                    'billing_postcode'   => isset($first_route['origin_postal_code']) ? $first_route['origin_postal_code'] : '',
+                    'billing_country'    => isset($first_route['origin_country']) ? $first_route['origin_country'] : '',
+                );
+
+                WC()->session->set('packlink_billing_data', $billing_data);
+            }
 
             // Create a virtual product for the shipping
             $product_id = Packlink_Checkout::get_or_create_shipping_product();
 
-                       // Add to cart
+            // Add to cart
             WC()->cart->empty_cart();
 
             $cart_item_data = array(
@@ -299,76 +351,80 @@ class Packlink_Ajax {
         }
         die();
     }
-    
+
     /**
      * Get destinations via AJAX
      *
      * @return void
      */
-    public static function get_destinations() {
+    public static function get_destinations()
+    {
         check_ajax_referer('packlink-ajax-nonce', 'security');
-        
+
         $postal_code = new Packlink_Postal_Code();
         $destinations = $postal_code->get_postal_zones();
-        
+
         wp_send_json_success($destinations);
     }
-    
+
     /**
      * Get formatted destinations via AJAX
      *
      * @return void
      */
-    public static function get_formatted_destinations() {
+    public static function get_formatted_destinations()
+    {
         check_ajax_referer('packlink-ajax-nonce', 'security');
-        
+
         $postal_code = new Packlink_Postal_Code();
         $destinations = $postal_code->get_formatted_postal_zones();
-        
+
         wp_send_json_success($destinations);
     }
-    
+
     /**
      * Search postal code via AJAX
      *
      * @return void
      */
-    public static function search_postal_code() {
+    public static function search_postal_code()
+    {
         check_ajax_referer('packlink-ajax-nonce', 'security');
-        
+
         $query = isset($_GET['query']) ? sanitize_text_field($_GET['query']) : '';
         $country = isset($_GET['country']) ? sanitize_text_field($_GET['country']) : '';
-        
+
         if (empty($query)) {
             wp_send_json_error(array('message' => 'Query parameter is required'));
             return;
         }
-        
+
         $postal_code = new Packlink_Postal_Code();
         $results = $postal_code->get($query, $country);
-        
+
         wp_send_json_success($results);
     }
-    
+
     /**
      * Suggest postal codes via AJAX
      *
      * @return void
      */
-    public static function suggest_postal_codes() {
+    public static function suggest_postal_codes()
+    {
         check_ajax_referer('packlink-ajax-nonce', 'security');
-        
+
         $term = isset($_GET['term']) ? sanitize_text_field($_GET['term']) : '';
         $country = isset($_GET['country']) ? sanitize_text_field($_GET['country']) : '';
-        
+
         if (empty($term) || empty($country)) {
             wp_send_json_error(array('message' => 'Term and country parameters are required'));
             return;
         }
-        
+
         $postal_code = new Packlink_Postal_Code();
         $suggestions = $postal_code->suggest($term, $country);
-        
+
         // Format results for autocomplete
         $results = array();
         foreach ($suggestions as $suggestion) {
@@ -379,16 +435,17 @@ class Packlink_Ajax {
                 'state' => isset($suggestion['state']) ? $suggestion['state'] : '',
             );
         }
-        
+
         wp_send_json($results);
     }
-    
+
     /**
      * Get tracking information for a shipment
      * 
      * @return void
      */
-    public static function get_tracking_info() {
+    public static function get_tracking_info()
+    {
         try {
 
             error_log('Arrived get_tracking_info');
@@ -396,45 +453,45 @@ class Packlink_Ajax {
             if (!check_ajax_referer('packlink_tracking_nonce', 'security', false)) {
                 throw new Exception(__('Invalid security token', 'packlink-custom-shipping'));
             }
-            
+
             // Check required fields
             if (!isset($_POST['reference']) || empty($_POST['reference'])) {
                 throw new Exception(__('Tracking reference is required', 'packlink-custom-shipping'));
             }
-            
+
             $reference = sanitize_text_field($_POST['reference']);
-            
+
             // First try to find the order by reference
             $order_id = self::find_order_by_reference($reference);
-            
+
             // Initialize shipment API
             $shipment_api = new Packlink_Shipment();
-            
+
             if ($order_id) {
                 // If order found, get all details from the order
                 $order = wc_get_order($order_id);
-                
+
                 if (!$order) {
                     throw new Exception(__('Order not found', 'packlink-custom-shipping'));
                 }
-                
+
                 // Get shipment details from the order
                 $shipment_details = get_post_meta($order_id, '_packlink_shipping_details', true);
-                
+
                 // Get tracking information
                 $tracking = $shipment_api->get_tracking($reference);
-                
+
                 if (is_wp_error($tracking)) {
                     throw new Exception($tracking->get_error_message());
                 }
-                
+
                 // Get shipment status
                 $shipment = $shipment_api->get($reference);
-                
+
                 if (is_wp_error($shipment)) {
                     throw new Exception($shipment->get_error_message());
                 }
-                
+
                 wp_send_json_success(array(
                     'status' => isset($shipment['status']) ? $shipment['status'] : 'UNKNOWN',
                     'tracking' => isset($tracking['tracking_events']) ? $tracking['tracking_events'] : array(),
@@ -451,18 +508,18 @@ class Packlink_Ajax {
                 // If no order found, try to get tracking directly from Packlink API
                 // Get shipment status
                 $shipment = $shipment_api->get($reference);
-                
+
                 if (is_wp_error($shipment)) {
                     throw new Exception($shipment->get_error_message());
                 }
-                
+
                 // Get tracking information
                 $tracking = $shipment_api->get_tracking($reference);
-                
+
                 if (is_wp_error($tracking)) {
                     throw new Exception($tracking->get_error_message());
                 }
-                
+
                 wp_send_json_success(array(
                     'status' => isset($shipment['status']) ? $shipment['status'] : 'UNKNOWN',
                     'tracking' => isset($tracking['tracking_events']) ? $tracking['tracking_events'] : array(),
@@ -490,41 +547,42 @@ class Packlink_Ajax {
      * @param string $reference Packlink reference number
      * @return int|bool Order ID or false if not found
      */
-    private static function find_order_by_reference($reference) {
+    private static function find_order_by_reference($reference)
+    {
         global $wpdb;
-        
+
         // First check for the main shipment ID
         $order_id = $wpdb->get_var($wpdb->prepare(
             "SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key = '_packlink_shipment_id' AND meta_value = %s LIMIT 1",
             $reference
         ));
-        
+
         if ($order_id) {
             return $order_id;
         }
-        
+
         // Then check for specific route shipment IDs
         $order_id = $wpdb->get_var($wpdb->prepare(
             "SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key LIKE '_packlink_shipment_id_route_%' AND meta_value = %s LIMIT 1",
             $reference
         ));
-        
+
         if ($order_id) {
             return $order_id;
         }
-        
+
         // Also check in all shipments array
         $all_shipments_orders = $wpdb->get_results(
             "SELECT post_id, meta_value FROM {$wpdb->postmeta} WHERE meta_key = '_packlink_all_shipments'"
         );
-        
+
         foreach ($all_shipments_orders as $order_meta) {
             $shipments = maybe_unserialize($order_meta->meta_value);
             if (is_array($shipments) && in_array($reference, $shipments)) {
                 return $order_meta->post_id;
             }
         }
-        
+
         return false;
     }
 }

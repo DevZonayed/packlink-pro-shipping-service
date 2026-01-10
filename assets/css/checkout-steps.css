@@ -1,0 +1,35 @@
+.pl-multistep-checkout{margin-bottom:20px}
+.pl-steps-header{display:flex;gap:12px;margin-bottom:16px}
+.pl-step-item{display:flex;align-items:center;gap:8px;padding:10px 12px;border:1px solid var(--color-gray-200);border-radius:8px;background:#fff;color:var(--text-secondary)}
+.pl-step-item .num{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;background:var(--color-gray-100);font-weight:700;color:var(--text-secondary)}
+.pl-step-item.active{border-color:var(--color-primary);color:var(--color-primary)}
+.pl-step-item.active .num{background:var(--color-primary);color:#fff}
+.pl-step-item.completed{border-color:var(--color-primary-light);color:var(--color-primary)}
+.pl-step{display:none;background:#fff;border:1px solid rgba(2,115,97,.08);box-shadow:0 2px 4px rgba(0,0,0,.02),0 8px 24px rgba(0,0,0,.06);border-radius:12px;padding:16px}
+.pl-step.active{display:block;animation:fadeIn .2s ease-out}
+.pl-two-col{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.pl-col{min-width:0}
+.pl-nav{display:flex;justify-content:space-between;gap:10px;margin-top:16px}
+.pl-nav .button{background:linear-gradient(135deg,var(--color-primary) 0%,var(--color-secondary) 100%);color:#fff;border:none;border-radius:8px;padding:10px 16px;cursor:pointer}
+.pl-review-wrap{display:flex;flex-direction:column;gap:16px}
+.pl-review-two-col{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.pl-review-box{border:1px solid var(--color-gray-200);border-radius:8px;padding:12px;background:#fff}
+.pl-card-logos{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:8px}
+.pl-card-logos a{display:inline-flex;align-items:center;justify-content:center;padding:6px 8px;border:1px solid var(--color-gray-200);border-radius:6px;background:#fff}
+.pl-card-logos img{height:20px;max-height:20px;width:auto;display:block}
+.pl-review-grid{display:grid;grid-template-columns:1fr 2fr;gap:8px}
+.pl-row{display:contents}
+.pl-label{color:var(--text-secondary)}
+#pl-multistep-checkout .pl-left .col-2{display: none;}
+#pl-multistep-checkout .pl-left .col-1{width: 100%;}
+.woocommerce .lqd-woo-steps{display: none;}
+.pl-step2 #order_review .packlink-checkout-review{display: none;}
+.pl-value{font-weight:600}
+@media (max-width:768px){
+ .pl-two-col{grid-template-columns:1fr}
+ .pl-steps-header{flex-direction:column}
+ .pl-review-two-col{grid-template-columns:1fr}
+ .pl-review-grid{grid-template-columns:1fr}
+  .pl-card-logos{justify-content:flex-start}
+}
+

@@ -35,11 +35,8 @@ class Packlink_Order_Display
         // Display in admin order view
         add_action('woocommerce_admin_order_data_after_shipping_address', array(self::class, 'display_in_admin_order'), 20);
 
-        // Add shipping details to order meta for API access
+        // Add to order totals table
         add_filter('woocommerce_get_order_item_totals', array(self::class, 'add_to_order_totals'), 25, 2);
-
-        // Display shipping details on checkout review section
-        add_action('woocommerce_checkout_order_review', array(self::class, 'display_on_checkout_review'), 30);
 
         // Add CSS styles for the shipping details
         add_action('wp_enqueue_scripts', array(self::class, 'enqueue_styles'));
@@ -61,7 +58,7 @@ class Packlink_Order_Display
             return;
         }
 
-        echo '<h2>' . __('Packlink Shipping Details', 'packlink-custom-shipping') . '</h2>';
+        echo '<h2>' . __('Reluggz Shipping Details', 'packlink-custom-shipping') . '</h2>';
         self::display_shipping_details($order_id);
     }
 
@@ -139,7 +136,7 @@ class Packlink_Order_Display
         // Display the shipping details
 ?>
         <div class="packlink-checkout-review">
-            <h3><?php esc_html_e('Packlink Shipping Details', 'packlink-custom-shipping'); ?></h3>
+            <h3><?php esc_html_e('Reluggz Shipping Details', 'packlink-custom-shipping'); ?></h3>
 
             <?php if (!empty($routes_info)) : ?>
                 <h4><?php esc_html_e('Routes Information', 'packlink-custom-shipping'); ?></h4>
@@ -279,7 +276,7 @@ class Packlink_Order_Display
             }
 
             $total_rows['packlink_shipping'] = array(
-                'label' => __('Packlink Shipping:', 'packlink-custom-shipping'),
+                'label' => __('Reluggz Shipping:', 'packlink-custom-shipping'),
                 'value' => implode('<br>', $route_details),
             );
         }

@@ -117,7 +117,7 @@
                 <label class="contact-connect-option" style="display: flex; align-items: center; cursor: pointer;">
                     <input type="checkbox" id="connect-contacts" checked style="position: relative; width: 40px; height: 20px; margin: 0 10px 0 0; appearance: none; background-color: #ccc; border-radius: 20px; transition: 0.4s; outline: none; cursor: pointer;">
                     <span class="contact-connect-text" style="user-select: none;"><?php _e('Connect contacts (recipient of one route becomes sender of next)', 'packlink-custom-shipping'); ?></span>
-                    
+
                 </label>
             </div>
 
@@ -157,7 +157,7 @@
                 <div class="review-item">
                     <h4><?php _e('Total Price', 'packlink-custom-shipping'); ?></h4>
                     <div class="review-details">
-                        <p class="total-price"><?php _e('Total', 'packlink-custom-shipping'); ?>: <span id="summary-total-price">€0.00</span></p>
+                        <p class="total-price"><?php _e('Total', 'packlink-custom-shipping'); ?>: <span id="summary-total-price"><?php echo Packlink_Currency_Handler::format_price(0, null, false); ?></span></p>
                     </div>
                 </div>
             </div>
@@ -333,3 +333,92 @@
         </div>
     </div>
 </div>
+
+<script type="text/javascript">
+    jQuery(document).ready(function($) {
+        // Enhanced function to display shipping rates with proper currency formatting
+        function displayShippingRatesWithCurrency(response) {
+            var rates = response.rates || response; // Handle both old and new response format
+            var currencyInfo = response.currency_info || {};
+
+            var container = $('#shipping-options-container');
+            container.empty();
+
+            if (!rates || rates.length === 0) {
+                container.html('<p class="no-shipping-options">' + packlink_custom.no_shipping_options + '</p>');
+                return;
+            }
+
+            // Create shipping options HTML
+            var optionsHtml = '<div class="shipping-options-list">';
+
+            $.each(rates, function(index, rate) {
+                var deliveryInfo = '';
+                if (rate.deliveryTime) {
+                    deliveryInfo = '<span class="delivery-time">' + rate.deliveryTime + '</span>';
+                }
+                if (rate.firstDeliveryDate) {
+                    deliveryInfo += '<span class="delivery-date">' + packlink_custom.estimated_delivery + ': ' + rate.firstDeliveryDate + '</span>';
+                }
+
+                // Format price using the global currency formatter
+                var formattedPrice = window.formatPacklinkPrice ? window.formatPacklinkPrice(rate.price, false) : rate.currency + ' ' + rate.price.toFixed(2);
+
+                var isDropOffRequired = rate.isDropOff ? 'data-drop-off="true"' : '';
+                var dropOffIndicator = rate.isDropOff ? '<span class="drop-off-indicator">' + packlink_custom.drop_off_point_required + '</span>' : '';
+
+                optionsHtml += '<div class="shipping-option" data-rate-id="' + rate.id + '" ' + isDropOffRequired + '>';
+                optionsHtml += '  <div class="option-header">';
+                optionsHtml += '    <div class="carrier-info">';
+                if (rate.logoUrl) {
+                    optionsHtml += '      <img src="' + rate.logoUrl + '" alt="' + rate.carrierName + '" class="carrier-logo">';
+                }
+                optionsHtml += '      <div class="carrier-details">';
+                optionsHtml += '        <h4 class="carrier-name">' + rate.carrierName + '</h4>';
+                optionsHtml += '        <p class="service-name">' + (rate.serviceName || '') + '</p>';
+                optionsHtml += '      </div>';
+                optionsHtml += '    </div>';
+                optionsHtml += '    <div class="price-info">';
+                optionsHtml += '      <span class="price">' + formattedPrice + '</span>';
+                optionsHtml += '    </div>';
+                optionsHtml += '  </div>';
+                optionsHtml += '  <div class="option-details">';
+                optionsHtml += '    ' + deliveryInfo;
+                optionsHtml += '    ' + dropOffIndicator;
+                optionsHtml += '  </div>';
+                optionsHtml += '  <div class="option-actions">';
+                optionsHtml += '    <button type="button" class="btn-select-shipping" data-rate-id="' + rate.id + '">';
+                optionsHtml += '      ' + packlink_custom.select_button_text;
+                optionsHtml += '    </button>';
+                optionsHtml += '  </div>';
+                optionsHtml += '</div>';
+            });
+
+            optionsHtml += '</div>';
+            container.html(optionsHtml);
+        }
+
+        // Update total price display with proper currency formatting
+        function updateTotalPrice(total) {
+            var formattedTotal = window.formatPacklinkPrice ? window.formatPacklinkPrice(total, false) : total.toFixed(2);
+            $('#summary-total-price').text(formattedTotal);
+        }
+
+        // Listen for currency changes (if WOOCS triggers events)
+        $(document).on('woocs_currency_changed', function(e, currency) {
+            // Refresh shipping rates if they were already loaded
+            if ($('.shipping-options-list').length > 0) {
+                // Trigger a refresh of shipping rates
+                $('.btn-next[data-next="shipping-section"]').trigger('click');
+            }
+        });
+
+        // Extend existing form functionality
+        if (typeof window.packlinkFormExtensions === 'undefined') {
+            window.packlinkFormExtensions = {};
+        }
+
+        window.packlinkFormExtensions.displayShippingRates = displayShippingRatesWithCurrency;
+        window.packlinkFormExtensions.updateTotalPrice = updateTotalPrice;
+    });
+</script>

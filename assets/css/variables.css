@@ -1,15 +1,15 @@
 /* Variables */
 :root {
   /* Colors */
-  --color-primary: #0A2463;
-  --color-primary-light: rgba(10, 36, 99, 0.1);
-  --color-primary-dark: #071950;
-  --color-secondary: #3E92CC;
-  --color-secondary-light: rgba(62, 146, 204, 0.1);
-  --color-secondary-dark: #2B78AF;
-  --color-accent: #FF9B42;
-  --color-accent-light: rgba(255, 155, 66, 0.1);
-  --color-accent-dark: #E87F26;
+  --color-primary: #027361;
+  --color-primary-light: rgba(2, 115, 97, 0.1);
+  --color-primary-dark: #015C4E;
+  --color-secondary: #20B2AA;
+  --color-secondary-light: rgba(32, 178, 170, 0.1);
+  --color-secondary-dark: #1A9B94;
+  --color-accent: #FF8A65;
+  --color-accent-light: rgba(255, 138, 101, 0.1);
+  --color-accent-dark: #FF7043;
   
   --color-success: #10B981;
   --color-success-light: rgba(16, 185, 129, 0.1);

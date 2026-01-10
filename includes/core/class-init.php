@@ -101,6 +101,9 @@ class Packlink_Init
 
         // Register frontend scripts
         add_action('wp_enqueue_scripts', array(self::class, 'register_frontend_scripts'));
+
+        // Add currency data to frontend scripts
+        add_action('wp_footer', array(self::class, 'add_currency_data_to_js'), 25);
     }
 
     /**
@@ -113,10 +116,14 @@ class Packlink_Init
         // Load AJAX classes
         require_once PACKLINK_CUSTOM_PLUGIN_DIR . 'includes/core/class-ajax.php';
         require_once PACKLINK_CUSTOM_PLUGIN_DIR . 'includes/core/class-lookup.php';
+        require_once PACKLINK_CUSTOM_PLUGIN_DIR . 'includes/core/class-currency-handler.php';
 
         // Initialize AJAX handlers
         Packlink_Ajax::init();
         Packlink_Lookup::init();
+
+        // Initialize currency handler
+        Packlink_Currency_Handler::init();
     }
 
     /**
@@ -127,6 +134,7 @@ class Packlink_Init
     private static function init_shortcodes()
     {
         require_once PACKLINK_CUSTOM_PLUGIN_DIR . 'includes/frontend/class-shortcode.php';
+        require_once PACKLINK_CUSTOM_PLUGIN_DIR . 'includes/class-quote-shortcode.php';
 
         Packlink_Shortcode::init();
 
@@ -273,6 +281,41 @@ class Packlink_Init
             'to' => __('To', 'packlink-custom-shipping'),
             'no_tracking_available' => __('No tracking information available yet', 'packlink-custom-shipping')
         ));
+
+        // Register multistep checkout assets (loaded only on checkout page)
+        wp_register_script(
+            'packlink-checkout-steps',
+            PACKLINK_CUSTOM_PLUGIN_URL . 'assets/js/frontend/checkout-steps.js',
+            array('jquery'),
+            PACKLINK_CUSTOM_VERSION,
+            true
+        );
+
+        // Localize brand logos and links for checkout steps
+        wp_localize_script('packlink-checkout-steps', 'packlink_checkout_steps', array(
+            'brand_logos' => array(
+                'maestro' => PACKLINK_CUSTOM_PLUGIN_URL . 'assets/images/carriers/maestro.jpeg',
+                'mastercard' => PACKLINK_CUSTOM_PLUGIN_URL . 'assets/images/carriers/mastercard.jpeg',
+                'visa' => PACKLINK_CUSTOM_PLUGIN_URL . 'assets/images/carriers/visa.jpeg',
+                'links' => array(
+                    'maestro' => 'https://www.mastercard.com',
+                    'mastercard' => 'https://www.mastercard.com/brandcenter/us/en/home.html',
+                    'visa' => 'https://www.visaeurope.com'
+                )
+            )
+        ));
+
+        wp_register_style(
+            'packlink-checkout-steps',
+            PACKLINK_CUSTOM_PLUGIN_URL . 'assets/css/checkout-steps.css',
+            array('packlink-frontend-styles'),
+            PACKLINK_CUSTOM_VERSION
+        );
+
+        if (function_exists('is_checkout') && is_checkout()) {
+            wp_enqueue_style('packlink-checkout-steps');
+            wp_enqueue_script('packlink-checkout-steps');
+        }
     }
 
     /**
@@ -341,5 +384,83 @@ class Packlink_Init
             'review_your_shipment' => __('Review Your Shipment', 'packlink-custom-shipping'),
             'check_details_before_submitting' => __('Check all details before submitting', 'packlink-custom-shipping'),
         );
+    }
+
+    /**
+     * Add currency data to JavaScript
+     *
+     * @return void
+     */
+    public static function add_currency_data_to_js()
+    {
+        // Only add currency data where Packlink scripts are enqueued
+        if (!wp_script_is('packlink-custom-form', 'enqueued')) {
+            return;
+        }
+
+        $currency_data = Packlink_Currency_Handler::get_currency_data_for_js();
+
+?>
+        <script type="text/javascript">
+            window.packlinkCurrency = <?php echo json_encode($currency_data); ?>;
+
+            // Function to format price with currency
+            window.formatPacklinkPrice = function(amount, convert) {
+                convert = convert !== false; // Default to true
+
+                if (!window.packlinkCurrency) {
+                    return amount.toFixed(2);
+                }
+
+                var currency = window.packlinkCurrency;
+                var price = convert && currency.is_multi_currency_active ? amount : amount;
+
+                // Format number
+                var formatted = price.toFixed(currency.decimals);
+                formatted = formatted.replace('.', currency.decimal_separator);
+
+                // Add thousand separators
+                if (currency.thousand_separator) {
+                    var parts = formatted.split(currency.decimal_separator);
+                    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, currency.thousand_separator);
+                    formatted = parts.join(currency.decimal_separator);
+                }
+
+                // Add currency symbol
+                switch (currency.position) {
+                    case 'left':
+                        return currency.symbol + formatted;
+                    case 'right':
+                        return formatted + currency.symbol;
+                    case 'left_space':
+                        return currency.symbol + ' ' + formatted;
+                    case 'right_space':
+                        return formatted + ' ' + currency.symbol;
+                    default:
+                        return currency.symbol + formatted;
+                }
+            };
+
+            // Function to convert price using current rates
+            window.convertPacklinkPrice = function(amount, fromCurrency, toCurrency) {
+                if (!window.packlinkCurrency || !window.packlinkCurrency.is_multi_currency_active) {
+                    return amount;
+                }
+
+                toCurrency = toCurrency || window.packlinkCurrency.current_currency;
+
+                if (fromCurrency === toCurrency) {
+                    return amount;
+                }
+
+                var rates = window.packlinkCurrency.rates;
+                if (rates[toCurrency]) {
+                    return amount * parseFloat(rates[toCurrency].rate);
+                }
+
+                return amount;
+            };
+        </script>
+<?php
     }
 }
