@@ -482,6 +482,18 @@ class Packlink_Checkout
      */
     public static function add_packlink_shipping_fee($cart)
     {
+        // Shipping fee is now handled by the product price
+        return;
+    }
+
+    /**
+     * Set Packlink shipping product price
+     * 
+     * @param WC_Cart $cart Cart object.
+     * @return void
+     */
+    public static function set_packlink_shipping_product_price($cart)
+    {
         if (is_admin() && !defined('DOING_AJAX')) {
             return;
         }
@@ -508,7 +520,12 @@ class Packlink_Checkout
                 }
             }
             
-            $cart->add_fee(__('Reluggz Shipping', 'packlink-custom-shipping'), $converted_price);
+            // Iterate through cart items and update the price of the shipping product
+            foreach ($cart->get_cart() as $cart_item) {
+                if (isset($cart_item['packlink_shipping_data'])) {
+                    $cart_item['data']->set_price($converted_price);
+                }
+            }
         }
     }
 

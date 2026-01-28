@@ -152,6 +152,7 @@ class Packlink_Init
         // Hook into WooCommerce order processing
         add_action('woocommerce_checkout_update_order_meta', array('Packlink_Checkout', 'save_shipping_data_to_order'));
         add_action('woocommerce_order_status_processing', array('Packlink_Checkout', 'create_packlink_shipment'), 10, 1);
+        add_action('woocommerce_before_calculate_totals', array('Packlink_Checkout', 'set_packlink_shipping_product_price'));
         add_action('woocommerce_cart_calculate_fees', array('Packlink_Checkout', 'add_packlink_shipping_fee'));
         add_action('woocommerce_new_order', array('Packlink_Checkout', 'ensure_packlink_data_saved'), 10, 1);
 

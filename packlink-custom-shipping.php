@@ -3,7 +3,7 @@
 /**
  * Plugin Name: Packlink Custom Shipping Extension
  * Description: Custom integration with Packlink PRO shipping API
- * Version: 3.2.8
+ * Version: 3.2.9
  * Author: Jonayed Ahamed, DeveloperJillur
  * Requires at least: 5.0
  * Requires PHP: 7.2
